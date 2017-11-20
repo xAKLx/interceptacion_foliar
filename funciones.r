@@ -1,3 +1,6 @@
+setClass("data", slots=list(plantones="list"))
+
+
 #' Crea o actualiza un objeto con la informacion suministrada.
 #' 
 #' Todos los parametros a excepcion de data son strings representativas de los 
@@ -16,7 +19,15 @@
 #' informacion de data y con la informacion proveida en los demas parametros.
 #' @export
 importar <- function(plantones, puntosCaptaciones, sesion, eventos, data) {
+  data <- new("data");
+  data@plantones <- read.csv(file = plantones, header = TRUE, sep = ",", stringsAsFactors = FALSE);
   
+  
+  for(column in colnames(data@plantones)){
+    data@plantones[,column] <- plantonesParser(column, data@plantones[,column])
+  }
+  
+  data
 }
 
 #' Filtra un conjunto de datos por una regla y guarda el resultado en un archivo.
@@ -31,6 +42,17 @@ importar <- function(plantones, puntosCaptaciones, sesion, eventos, data) {
 #' @param destino nombre del archivo destino.
 #' @export
 filtrarData <- function(data, tipoDeData, regla, destino) {
+  conjunto <- attr(data, tipoDeData);
+  
+  if(nrow(conjunto) > 0) {
+    name  <- conjunto[0,];
+    for(index in seq(1:nrow(conjunto))){
+      if(regla(conjunto[index, ]))
+        name[nrow(name)+1,] <- conjunto[index,]; 
+    }
+    
+    name
+  }
   
 }
   
@@ -43,8 +65,10 @@ filtrarData <- function(data, tipoDeData, regla, destino) {
 #' @return TRUE si el valor de la columna en la fila es igual al valor 
 #' suministrado, FALSE si esto no es cierto.
 #' @export
-reglaIgualdad <- function(fila, columna, valor) {
-  
+reglaIgualdad <- function(columna, valor) {
+  function(fila) {
+    fila[1,columna] == valor
+  }
 }
 
 #' Evalúa si la columna de fila suministrada tiene un valor entre el rango
@@ -58,31 +82,41 @@ reglaIgualdad <- function(fila, columna, valor) {
 #' @return TRUE si el valor de la columna en la fila se encuentra entre el
 #' rango de valorMinimo-valorMaximo, FALSE si esto no es cierto.
 #' @export
-reglaRango <- function(fila, columna, valorMinimo, valorMaximo
-                            , destino) {
+reglaRango <- function(columna, valorMinimo, valorMaximo) {
+  function(fila) {
+    fila[1,columna] >= valorMinimo && fila[1,columna] <= valorMaximo;
+  }
+}
+
+crearRespaldo <- function(data, respaldador) {
+  respaldador(plantones = data@plantones);
+}
+
+cargarRespaldo <- function(plantones) {
+  data <- new("data");
+  data@plantones <- plantones;
+  data;
+}
+
+funcRespaldador <- function(plantones) {
+  data <- new("data");
+  data@plantones <- plantones;
+  
+  destFile <- file("test2.txt", open = "w");
+  serialize(data, destFile);
+  close(destFile);
   
 }
 
-#' Crea un respaldo. de la data
-#' 
-#' @param data Objeto a guardar creado por la función de importar o 
-#' importarRespaldo.
-#' @return nombre del respaldo.
-crearRespaldo <- function(data) {
+funcCargador <- function(fileName) {
+  destFile <- file(fileName, open = "r");
+  data = unserialize(destFile);
+  close(destFile);
   
+  cargarRespaldo(plantones = data@plantones);
 }
 
-#' Restaura un respaldo dado un nombre
-#' @param name string representativo del nombre del respaldo.
-#' @return objeto con la informacion del respaldo.
-importarRespaldo <- function(name) {
-  
-}
 
-#' Obtiene un vector con todos los nombres de los respaldos disponibles
-#'
-#' @return vector con los nombres de todos los respaldos. 
-obtenerRespaldos <- function() {
-  
-}
+
+
 
