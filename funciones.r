@@ -20,16 +20,32 @@ setClass("data", slots=list(plantones="list"))
 #' el parametro data no es proveido. de otro modo, un objeto con la
 #' informacion de data y con la informacion proveida en los demas parametros.
 #' @export
-importar <- function(plantones, puntosCaptaciones, sesion, eventos, data) {
-  data <- new("data");
-  data@plantones <- read.csv(file = plantones, header = TRUE, sep = ",", stringsAsFactors = FALSE);
+importar <- function(plantones, puntosCaptaciones, sesion, eventos, data
+                     , sobreescribir) {
+  newData <- new("data");
+  
+  if(!missing(plantones)) {
+    newData@plantones <- plantones
+  } 
+  
+  if(!missing(puntosCaptaciones)) {
+    newData@puntosCaptaciones <- puntosCaptaciones
+  } 
+  
+  if(!missing(sesion)) {
+    newData@sesion <- sesion
+  } 
+  
+  if(!missing(eventos)) {
+    newData@eventos <- eventos
+  } 
   
   
-  for(column in colnames(data@plantones)){
-    data@plantones[,column] <- plantonesParser(column, data@plantones[,column])
+  if(missing(data)) {
+    newData
+  } else {
+    combinarData(destino = data, origin = newData, sobreescribir);
   }
-  
-  data
 }
 
 #' Crea o actualiza un objeto con la informacion suministrada.
@@ -49,17 +65,61 @@ importar <- function(plantones, puntosCaptaciones, sesion, eventos, data) {
 #' el parametro data no es proveido. de otro modo, un objeto con la
 #' informacion de data y con la informacion proveida en los demas parametros.
 #' @export
-importarDesdeArchivos <- function(plantones, puntosCaptaciones, sesion, eventos, data) {
-  data <- new("data");
-  data@plantones <- read.csv(file = plantones, header = TRUE, sep = ",", stringsAsFactors = FALSE);
+importarDesdeArchivos <- function(plantones, puntosCaptaciones, sesion, eventos
+                                  , data, sobreescribir) {
+  newData <- new("data");
+  
+  if(!missing(plantones)) {
+    newData@plantones <- read.csv(file = plantones, header = TRUE, sep = ",", stringsAsFactors = FALSE);
+    
+    
+    for(column in colnames(newData@plantones)){
+      newData@plantones[,column] <- PlantonesParser(column, newData@plantones[,column])
+    }
+  } 
+  
+  if(!missing(puntosCaptaciones)) {
+    newData@puntosCaptaciones <- read.csv(file = puntosCaptaciones, header = TRUE
+                                       , sep = ",", stringsAsFactors = FALSE);
+    
+    
+    for(column in colnames(newData@puntosCaptaciones)){
+      newData@puntosCaptaciones[,column] <- PuntosCaptacionesParser(
+        column, newData@puntosCaptaciones[,column])
+    }
+  } 
+  
+  if(!missing(sesion)) {
+    newData@sesion <- read.csv(file = sesion, header = TRUE
+                                          , sep = ",", stringsAsFactors = FALSE);
+    
+    
+    for(column in colnames(newData@sesion)){
+      newData@sesion[,column] <- SesionesParser(
+        column, newData@sesion[,column])
+    }
+  } 
+  
+  if(!missing(eventos)) {
+    newData@eventos <- read.csv(file = eventos, header = TRUE
+                               , sep = ",", stringsAsFactors = FALSE);
+    
+    
+    for(column in colnames(newData@eventos)){
+      newData@eventos[,column] <- EventosParser(
+        column, newData@eventos[,column])
+    }
+  } 
   
   
-  for(column in colnames(data@plantones)){
-    data@plantones[,column] <- plantonesParser(column, data@plantones[,column])
+  if(missing(data)) {
+    newData
+  } else {
+    combinarData(destino = data, origin = newData, sobreescribir);
   }
-  
-  data
 }
+
+combinarData <- function(destino, origen, sobreescribir)
 
 #' Filtra un conjunto de datos por una regla y guarda el resultado en un archivo.
 #'
@@ -165,6 +225,30 @@ funcCargador <- function(fileName) {
   cargarRespaldo(plantones = data@plantones);
 }
 
+builder <- function(hd, hm, Aint, Aef) {
+  h <<- 0;
+  descargando <<- FALSE;
+  g <- 9.8
+  function(Qp) {
+    h <<- h + Qp;
+    
+    if(!descargando) {
+      descargando <- h >= hd;
+      Qd <- 0;
+    } 
+    
+    if(descargando){
+      Qd <- Aef * sqrt(2 * g * h)
+      
+      if((h - Qd) < hm)
+        Qd <- h - hm
+      h <<- h - Qd;
+      descargando <- h > hm;
+    }
+    
+    c(Qd, h)
+  }
+}
 
 
 
