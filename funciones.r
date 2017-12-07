@@ -225,10 +225,25 @@ funcCargador <- function(fileName) {
   cargarRespaldo(plantones = data@plantones);
 }
 
+#' Crea el modelo
+#' 
+#' @param hd  Lámina máxima posible de acumular
+#' @param hm  Lámina mínima (lámina muerta)
+#' @param Aint   Área efectiva de interceptación
+#' @param Aef Área efectiva de descarga
+#' 
+#' @return funcion representativa del modelo
 builder <- function(hd, hm, Aint, Aef) {
+  #'  Lámina acumulada
   h <<- 0;
+  
   descargando <<- FALSE;
   g <- 9.8
+  
+  #' Modelo
+  #' 
+  #' @param Qp Intensidad de la precipitación
+  #' @return c(Intensidad de la descarga,  Lámina acumulada)
   function(Qp) {
     h <<- h + Qp;
     
