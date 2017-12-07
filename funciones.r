@@ -119,11 +119,17 @@ importarDesdeArchivos <- function(plantones, puntosCaptaciones, sesion, eventos
   }
 }
 
-combinarData <- function(destino, origen, sobreescribir)
+combinarData <- function(destino, origen, sobreescribir= TRUE) {
+  for(i in seq(from = 1, to = nrow(origen@plantones))) {
+    for(j in seq(from = 1, to = nrow(destino))) {
+      #if(destino[1,'']) {}
+    }
+  }
+}
 
 #' Filtra un conjunto de datos por una regla y guarda el resultado en un archivo.
 #'
-#' @param data objeto con al información
+#' @param data objeto con la información
 #' @param tipoDeData conjunto de datos que se quiere filtrar, los posibles 
 #' valores son los nombres de los parametros de la funcion importar excluyendo 
 #' data.
@@ -240,7 +246,7 @@ builder <- function(hd, hm, Aint, Aef) {
   descargando <<- FALSE;
   g <- 9.8
   
-  #' Modelo
+  #' Modelo de interceptación foliar
   #' 
   #' @param Qp Intensidad de la precipitación
   #' @return c(Intensidad de la descarga,  Lámina acumulada)
