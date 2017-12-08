@@ -39,17 +39,10 @@ builder <- function(hd, hm, Aint, Aef) {
   }
 }
 
-graphModel <- function(hd, hm, Aint, Aef, xData) {
+graphModel <- function(hd, hm, Aint, Aef, eventos) {
   modelo <- builder(hd, hm, Aint, Aef);
   
-  expresion <- function(Qp) {
-    x <- sapply(Qp, modelo)[1,];
-    print(Qp)
-    x
-  }
-  #plot.function(expresion, xData, ylab = "salida", main = "klk");
-  x <- sapply(xData, modelo)[2,];
-  print(x);
+  x <- getSolucion(xData, modelo);
   plot(x)
 }
 
