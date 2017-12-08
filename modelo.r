@@ -32,7 +32,7 @@ builder <- function(hd, hm, Aint, Aef) {
         Qd <- h - hm
       
       h <<- h - Qd;
-      descargando <- h > hm;
+      descargando <<- h > hm;
     }
     
     c(Qd, h)
@@ -51,4 +51,31 @@ graphModel <- function(hd, hm, Aint, Aef, xData) {
   x <- sapply(xData, modelo)[2,];
   print(x);
   plot(x)
+}
+
+getSolucion <- function(eventos, modelo){
+  first <<- TRUE
+  i <<- 1
+  f <- function(t, y, parms){
+    with(as.list(c(y, parms)),{
+
+      if(first) {
+        first <<- FALSE
+        list(c(1,1))
+      } else {
+        result <- modelo(eventos[i, 'lamina'])
+        i <<- i + 1
+        list(c(result[2] - h, result[1] - Qd))
+      }
+    })
+    
+    
+  }
+  
+  yini = c(h= 0, Qd= 0)
+  
+  sol <- ode(y = yini, times = c(0, eventos[, 'fecha']), func = f, parms = NULL , method = "euler")
+  colnames(sol) <- list('time', 'h(t)', 'Qd(t)')
+  
+  return(sol)
 }

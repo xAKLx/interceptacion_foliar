@@ -38,7 +38,7 @@ SesionesParser <- function(columna, valor) {
 EventosParser <- function(columna, valor) {
   switch(
     columna,
-    "fecha" = as.POSIXlt(valor),
+    "fecha" = as.POSIXlt(as.numeric(Sys.time()), origin =valor),
     "lamina" = as.double(valor),
     valor
   )

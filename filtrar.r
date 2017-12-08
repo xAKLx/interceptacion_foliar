@@ -35,6 +35,12 @@ filtrarData <- function(data, tipoDeData, regla, filtrador, destino) {
   
 }
 
+#' Crea una funcion filtrador para sustituir el valor de una columna
+#' 
+#' @columna columnda a sustituir
+#' @nuevoValor nuevo valor de la columna en la fila recibida
+#' 
+#' @return funcion filtradora para usar con filtrar Data
 filtradorSustituir <- function(columna, nuevoValor) {
   function(fila) {
     fila[1,columna] = nuevoValor

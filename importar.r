@@ -1,5 +1,5 @@
 source('~/Development/interceptacion_foliar/parser.r')
-setClass("data", slots=list(plantones="list"))
+setClass("data", slots=list(plantones="list", eventos="list", puntosCaptaciones="list", sesion="list"))
 
 
 #' Crea o actualiza un objeto con la informacion suministrada.
@@ -21,7 +21,7 @@ setClass("data", slots=list(plantones="list"))
 #' informacion de data y con la informacion proveida en los demas parametros.
 #' @export
 importar <- function(plantones, puntosCaptaciones, sesion, eventos, data
-                     , sobreescribir) {
+                     , sobreescribir = TRUE) {
   newData <- new("data");
   
   if(!missing(plantones)) {
@@ -44,7 +44,7 @@ importar <- function(plantones, puntosCaptaciones, sesion, eventos, data
   if(missing(data)) {
     newData
   } else {
-    combinarData(destino = data, origin = newData, sobreescribir);
+    combinarData(destino = data, origen = newData, sobreescribir);
   }
 }
 
@@ -66,7 +66,7 @@ importar <- function(plantones, puntosCaptaciones, sesion, eventos, data
 #' informacion de data y con la informacion proveida en los demas parametros.
 #' @export
 importarDesdeArchivos <- function(plantones, puntosCaptaciones, sesion, eventos
-                                  , data, sobreescribir) {
+                                  , data, sobreescribir = TRUE) {
   newData <- new("data");
   
   if(!missing(plantones)) {
@@ -115,14 +115,65 @@ importarDesdeArchivos <- function(plantones, puntosCaptaciones, sesion, eventos
   if(missing(data)) {
     newData
   } else {
-    combinarData(destino = data, origin = newData, sobreescribir);
+    combinarData(destino = data, origen = newData, sobreescribir);
   }
 }
 
-combinarData <- function(destino, origen, sobreescribir= TRUE) {
-  for(i in seq(from = 1, to = nrow(origen@plantones))) {
-    for(j in seq(from = 1, to = nrow(destino))) {
-      #if(destino[1,'']) {}
-    }
+mismasColumnas <- function(elemento1, elemento2, columnas) {
+  result <- TRUE
+  for(columna in columnas) {
+    result <- result && (elemento1[columna] == elemento2[columna])
   }
+  result
 }
+
+mismoId <- function(elemento1, elemento2, nombreConjunto) {
+  switch(
+    nombreConjunto,
+    "plantones" =  mismasColumnas(elemento1, elemento2, c('id', 'idLote')),
+    mismasColumnas(elemento1, elemento2, c('id'))
+  )
+}
+
+combinarData <- function(destino, origen, sobreescribir= TRUE) {
+  for(conjunto in c("plantones", "puntosCaptaciones", "sesion", "eventos")) {
+    if(is.null(attr(origen, conjunto)))
+      next
+    
+    lista2 <- attr(origen, conjunto)
+    
+    if(is.null(attr(destino, conjunto))){
+      attr(destino, conjunto) <- attr(origen, conjunto)
+      next
+    }
+      
+    lista1 <- attr(destino, conjunto)
+  
+    for(i in seq(from = 1, to = nrow(lista2))) {
+      found <- FALSE
+      
+      for(j in seq(from = 1, to = nrow(lista1))) {
+        if(mismoId(lista1[j,], lista2[i,], conjunto)) {
+          found <- TRUE
+          
+          if(sobreescribir) {
+            lista1[j,] <- lista2[i,]
+          }
+        }
+      }
+      
+      if(!found) {
+        lista1[nrow(lista1) + 1,] <- lista2[i,]
+      }
+      
+    }
+    
+    attr(destino, conjunto) <- lista1
+    
+  }
+  
+  destino
+  
+}
+
+
