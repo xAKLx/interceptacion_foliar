@@ -1,0 +1,13 @@
+Package: AssistIntercepcionFoliar
+Title: Asistente de investigación de intercepción foliar
+Version: 1.0
+Authors@R: person("Angel", "Guzman", email = "first.last@example.com",
+                  role = c("aut", "cre"))
+    person("Rafael", "Contreras", email = "first.last@example.com",
+                  role = c("aut", "cre"))
+Description: Este paquete permite manipular la data obtenida de fluviometros en un
+    campo de plantones para asistir a un proceso investigativo.
+Depends: R (>= 3.1.0)
+License: DO WHAT THE FUCK YOU WANT TO PUBLIC LICENSE
+LazyData: true
+RoxygenNote: 6.0.1
